@@ -14,6 +14,61 @@ class _CadastrarReceitaState extends State<CadastrarReceita> {
   String _ingrediente2 = '';
   String _ingrediente3 = '';
 
+  final List<String> _tagsDisponiveis = [
+    'Doce',
+    'Salgado',
+    'Fitness',
+    'Vegetariana',
+    'Vegana',
+    'Rápida',
+    'Low Carb',
+  ];
+
+  final List<String> _tagsSelecionadas = [];
+
+  void _mostrarSelecaoDeTags() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        List<String> selecionadasTemp = List.from(_tagsSelecionadas);
+        return AlertDialog(
+          title: Text('Selecionar Tags'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: _tagsDisponiveis.map((tag) {
+                return CheckboxListTile(
+                  value: selecionadasTemp.contains(tag),
+                  title: Text(tag),
+                  onChanged: (bool? valor) {
+                    setState(() {
+                      if (valor == true) {
+                        selecionadasTemp.add(tag);
+                      } else {
+                        selecionadasTemp.remove(tag);
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _tagsSelecionadas.clear();
+                  _tagsSelecionadas.addAll(selecionadasTemp);
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text('Confirmar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +84,7 @@ class _CadastrarReceitaState extends State<CadastrarReceita> {
           children: [
             TextFormField(
               controller: _campoNomeReceita,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Nome da Receita',
                 border: OutlineInputBorder(),
               ),
@@ -47,7 +102,7 @@ class _CadastrarReceitaState extends State<CadastrarReceita> {
             Text('Ingredientes', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             TextFormField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Ingrediente 1',
                 border: OutlineInputBorder(),
               ),
@@ -63,7 +118,7 @@ class _CadastrarReceitaState extends State<CadastrarReceita> {
             ),
             const SizedBox(height: 10),
             TextFormField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Ingrediente 2',
                 border: OutlineInputBorder(),
               ),
@@ -79,7 +134,7 @@ class _CadastrarReceitaState extends State<CadastrarReceita> {
             ),
             const SizedBox(height: 10),
             TextFormField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Ingrediente 3',
                 border: OutlineInputBorder(),
               ),
@@ -94,6 +149,26 @@ class _CadastrarReceitaState extends State<CadastrarReceita> {
               },
             ),
             const SizedBox(height: 20),
+            Text('Tags', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            InkWell(
+              onTap: _mostrarSelecaoDeTags,
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Selecione as Tags',
+                  border: OutlineInputBorder(),
+                ),
+                child: Wrap(
+                  spacing: 8,
+                  children: _tagsSelecionadas.isEmpty
+                      ? [Text('Nenhuma tag selecionada')]
+                      : _tagsSelecionadas
+                          .map((tag) => Chip(label: Text(tag)))
+                          .toList(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
             SizedBox(
               width: 150,
               height: 40,
@@ -104,13 +179,19 @@ class _CadastrarReceitaState extends State<CadastrarReceita> {
                     _campoNomeReceita.clear();
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Receita salva com sucesso!')),
+
+                      SnackBar(
+                        content: Text(
+                          'Receita salva com sucesso!\nTags: ${_tagsSelecionadas.join(', ')}',
+                        ),
+                      ),
                     );
 
                     setState(() {
                       _ingrediente1 = '';
                       _ingrediente2 = '';
                       _ingrediente3 = '';
+                      _tagsSelecionadas.clear();
                     });
                   }
                 },

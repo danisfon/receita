@@ -38,6 +38,10 @@ class WidgetMenu extends StatelessWidget {
                 icone: Icons.assignment_rounded,
                 rotulo: 'Listar Receita',
                 rota: Rotas.listarReceita),
+            criarMenu(
+                icone: Icons.label_outline,
+                rotulo: 'Cadastrar Tag',
+                rota: Rotas.cadastrarTag),
           ],
         ),
       ),
