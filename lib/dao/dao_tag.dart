@@ -58,7 +58,7 @@ class DAOTag {
 
   DTOTag mapToDTO(Map<String, dynamic> map) {
     return DTOTag(
-      id: map['id'] as String?,
+      id: map['id'] as int?,
       nome: map['nome'] as String,
     );
   }

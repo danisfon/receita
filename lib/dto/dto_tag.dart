@@ -1,5 +1,5 @@
 class DTOTag {
-  String? id; 
+  int? id; 
   String nome;
 
   DTOTag({

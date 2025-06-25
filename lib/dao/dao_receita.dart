@@ -67,7 +67,7 @@ class DAOReceita {
 
   DTOReceita mapToDTO(Map<String, dynamic> map) {
     return DTOReceita(
-      id: map['id'] as String?,
+      id: map['id'] as int?,
       nome: map['nome'] as String,
       ingredientes: (map['ingredientes'] as String).split(','),
       tags: (map['tags'] as String).split(','),

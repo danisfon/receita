@@ -42,7 +42,7 @@ class Conexao {
     final List<String> criarTabelas = [
       '''
         CREATE TABLE IF NOT EXISTS Receita (
-          id TEXT PRIMARY KEY AUTOINCREMENT,
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
           nome TEXT NOT NULL,
           ingredientes TEXT NOT NULL,
           tags TEXT NOT NULL

@@ -1,5 +1,5 @@
 class DTOReceita {
-  String? id;
+  int? id;
   String nome;
   List<String> ingredientes;
   List<String> tags;
