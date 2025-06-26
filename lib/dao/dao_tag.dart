@@ -1,72 +1,66 @@
-import '/banco/sqlite/conexao.dart';
-import '/dto/dto_tag.dart';
+import 'package:flutter_application_1/banco/sqlite/conexao.dart';
+import 'package:flutter_application_1/dto/dto_tag.dart';
 import 'package:sqflite/sqflite.dart';
 
-class DAOTag {
-  final String sqlInserir = '''
-    INSERT INTO Tag (
-      nome
-    ) VALUES (?)
-  ''';
-
-  final String sqlAlterar = '''
-    UPDATE Tag SET
-      nome = ?
-    WHERE id = ?
-  ''';
-
-  final String sqlConsultarTodos = '''
-    SELECT * FROM Tag
-  ''';
-
-  final String sqlConsultarPorId = '''
-    SELECT * FROM Tag WHERE id = ?
-  ''';
-
-  final String sqlExcluir = '''
-    DELETE FROM Tag WHERE id = ?
-  ''';
-
-  Future<void> salvar(DTOTag tag) async {
+class TagDAO {
+  Future<int> inserir(DTOTag tag) async {
     final db = await Conexao.get();
-    if (tag.id == null) {
-      await db.rawInsert(sqlInserir, [
-        tag.nome,
-      ]);
-    } else {
-      await db.rawUpdate(sqlAlterar, [tag.nome, tag.id]);
-    }
-  }
-
-  Future<List<DTOTag>> consultarTodos() async {
-    final db = await Conexao.get();
-    final resultado = await db.rawQuery(sqlConsultarTodos);
-    return resultado.map((map) => mapToDTO(map)).toList();
-  }
-
-  Future<DTOTag?> consultarPorId(int id) async {
-    final db = await Conexao.get();
-    final resultado = await db.rawQuery(sqlConsultarPorId, [id]);
-    if (resultado.isEmpty) return null;
-    return mapToDTO(resultado.first);
-  }
-
-  Future<void> excluir(int id) async {
-    final db = await Conexao.get();
-    await db.rawDelete(sqlExcluir, [id]);
-  }
-
-  DTOTag mapToDTO(Map<String, dynamic> map) {
-    return DTOTag(
-      id: map['id'] as int?,
-      nome: map['nome'] as String,
+    return await db.insert(
+      'Tag',
+      {
+        'nome': tag.nome,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  Map<String, dynamic> dtoToMap(DTOTag dto) {
-    return {
-      'id': dto.id,
-      'nome': dto.nome,
-    };
+  Future<List<DTOTag>> listarTodos() async {
+    final db = await Conexao.get();
+    final resultado = await db.query('Tag');
+    return resultado.map((map) => DTOTag(
+      id: map['id'] as int?,
+      nome: map['nome'] as String,
+    )).toList();
+  }
+
+  Future<DTOTag?> buscarPorId(int id) async {
+    final db = await Conexao.get();
+    final resultado = await db.query(
+      'Tag',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (resultado.isNotEmpty) {
+      final map = resultado.first;
+      return DTOTag(
+        id: map['id'] as int?,
+        nome: map['nome'] as String,
+      );
+    }
+    return null;
+  }
+
+  Future<int> atualizar(DTOTag tag) async {
+    if (tag.id == null) {
+      throw Exception('ID da tag é obrigatório para atualizar');
+    }
+    final db = await Conexao.get();
+    return await db.update(
+      'Tag',
+      {
+        'nome': tag.nome,
+      },
+      where: 'id = ?',
+      whereArgs: [tag.id],
+    );
+  }
+
+  Future<int> deletar(int id) async {
+    final db = await Conexao.get();
+    return await db.delete(
+      'Tag',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

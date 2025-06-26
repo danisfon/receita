@@ -1,8 +1,8 @@
 class DTOReceita {
-  int? id;
-  String nome;
-  List<String> ingredientes;
-  List<String> tags;
+  final int? id;
+  final String nome;
+  final String ingredientes; 
+  final String tags; 
 
   DTOReceita({
     this.id,

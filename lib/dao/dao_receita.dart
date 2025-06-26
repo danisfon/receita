@@ -1,85 +1,75 @@
-import '/banco/sqlite/conexao.dart';
-import '/dto/dto_receita.dart';
+import 'package:flutter_application_1/banco/sqlite/conexao.dart';
+import 'package:flutter_application_1/dto/dto_receita.dart';
 import 'package:sqflite/sqflite.dart';
 
-class DAOReceita {
-  final String sqlInserir = '''
-    INSERT INTO Receita (
-      nome, ingredientes, tags
-    ) VALUES (?, ?, ?)
-  ''';
+class ReceitaDAO {
+Future<int> inserir(DTOReceita receita) async {
+  final db = await Conexao.get();
+  return await db.insert(
+    'Receita',
+    {
+      'nome': receita.nome,
+      'ingredientes': receita.ingredientes,
+      'tags': receita.tags,
+    },
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+}
 
-  final String sqlAlterar = '''
-    UPDATE Receita SET
-      nome = ?, ingredientes = ?, tags = ?
-    WHERE id = ?
-  ''';
 
-  final String sqlConsultarTodos = '''
-    SELECT * FROM Receita
-  ''';
-
-  final String sqlConsultarPorId = '''
-    SELECT * FROM Receita WHERE id = ?
-  ''';
-
-  final String sqlExcluir = '''
-    DELETE FROM Receita WHERE id = ?
-  ''';
-
-  Future<void> salvar(DTOReceita receita) async {
+  Future<List<DTOReceita>> listarTodos() async {
     final db = await Conexao.get();
-    if (receita.id == null) {
-      await db.rawInsert(sqlInserir, [
-        receita.nome,
-        receita.ingredientes.join(
-            ','),
-        receita.tags.join(
-            ',') 
-      ]);
-    } else {
-      await db.rawUpdate(sqlAlterar, [
-        receita.nome,
-        receita.ingredientes.join(','),
-        receita.tags.join(','),
-        receita.id
-      ]);
-    }
-  }
-
-  Future<List<DTOReceita>> consultarTodos() async {
-    final db = await Conexao.get();
-    final resultado = await db.rawQuery(sqlConsultarTodos);
-    return resultado.map((map) => mapToDTO(map)).toList();
-  }
-
-  Future<DTOReceita?> consultarPorId(int id) async {
-    final db = await Conexao.get();
-    final resultado = await db.rawQuery(sqlConsultarPorId, [id]);
-    if (resultado.isEmpty) return null;
-    return mapToDTO(resultado.first);
-  }
-
-  Future<void> excluir(int id) async {
-    final db = await Conexao.get();
-    await db.rawDelete(sqlExcluir, [id]);
-  }
-
-  DTOReceita mapToDTO(Map<String, dynamic> map) {
-    return DTOReceita(
+    final resultado = await db.query('Receita');
+    return resultado.map((map) => DTOReceita(
       id: map['id'] as int?,
       nome: map['nome'] as String,
-      ingredientes: (map['ingredientes'] as String).split(','),
-      tags: (map['tags'] as String).split(','),
+      ingredientes: map['ingredientes'] as String,
+      tags: map['tags'] as String,
+    )).toList();
+  }
+
+  Future<DTOReceita?> buscarPorId(int id) async {
+    final db = await Conexao.get();
+    final resultado = await db.query(
+      'Receita',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (resultado.isNotEmpty) {
+      final map = resultado.first;
+      return DTOReceita(
+        id: map['id'] as int?,
+        nome: map['nome'] as String,
+        ingredientes: map['ingredientes'] as String,
+        tags: map['tags'] as String,
+      );
+    }
+    return null;
+  }
+
+  Future<int> atualizar(DTOReceita receita) async {
+    if (receita.id == null) {
+      throw Exception('ID da receita é obrigatório para atualizar');
+    }
+    final db = await Conexao.get();
+    return await db.update(
+      'Receita',
+      {
+        'nome': receita.nome,
+        'ingredientes': receita.ingredientes,
+        'tags': receita.tags,
+      },
+      where: 'id = ?',
+      whereArgs: [receita.id],
     );
   }
 
-  Map<String, dynamic> dtoToMap(DTOReceita dto) {
-    return {
-      'id': dto.id,
-      'nome': dto.nome,
-      'ingredientes': dto.ingredientes.join(','),
-      'tags': dto.tags.join(','),
-    };
+  Future<int> deletar(int id) async {
+    final db = await Conexao.get();
+    return await db.delete(
+      'Receita',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }
