@@ -1,7 +1,6 @@
-
 import 'package:flutter/material.dart';
-import 'configuracao/aplicativo.dart';
+import 'package:receita/receita_app.dart';
 
 void main() {
-  runApp(const Aplicativo());
-}
+  runApp(const ReceitaApp());
+} 
