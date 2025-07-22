@@ -62,15 +62,24 @@ class ScriptSQLite {
       FOREIGN KEY(ingrediente_id) REFERENCES ingrediente(id),
       UNIQUE(receita_id, ingrediente_id)
     );
+    ''',
+    '''
+    CREATE TABLE autor_rede_social (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      autor_id INTEGER NOT NULL,
+      rede TEXT NOT NULL,
+      url TEXT NOT NULL,
+      FOREIGN KEY(autor_id) REFERENCES autor(id)
+    );
     '''
   ];
 
   static List<List<String>> comandosInsercoes = [
-    // Inserções iniciais (opcional)
     [
       "INSERT INTO categoria (nome, descricao) VALUES ('Sobremesa', 'Doces em geral');",
       "INSERT INTO categoria (nome, descricao) VALUES ('Prato principal', 'Almoço ou jantar');",
     ],
+    [],
     [],
     [],
     [],

@@ -1,5 +1,6 @@
 class Rotas {
   // Telas principais
+  static const String menuPrincipal = '/';
   static const String home = '/home';
   static const String login = '/login';
 
@@ -23,11 +24,12 @@ class Rotas {
   static const String cadastroReceita = '/cadastro-receita';
   static const String listaReceitas = '/lista-receitas';
 
+  static const String cadastroAutorRedeSocial = '/cadastro-autor-rede-social';
+  static const String listaAutorRedeSocial = '/lista-autor-rede-social';
+
+
   // Associação N:N
-  static const String cadastroReceitaIngrediente =
-      '/cadastro-ingrediente-por-receita';
-  static const String listaReceitaIngredientes =
-      '/lista-ingredientes-por-receita';
-  // constante
-  static const String menuPrincipal = '/';
+  static const String cadastroReceitaIngrediente = '/cadastro-ingrediente-por-receita';
+  static const String listaReceitaIngredientes = '/lista-ingredientes-por-receita';
+  
 }

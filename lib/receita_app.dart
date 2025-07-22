@@ -1,6 +1,7 @@
 // lib/receita_app.dart
 import 'package:flutter/material.dart';
 import 'package:receita/configuracao/rotas.dart';
+import 'package:receita/widget/menu_principal.dart';
 
 // IMPORTS DOS FORMULÁRIOS
 import 'package:receita/widget/form_categoria.dart';
@@ -10,6 +11,7 @@ import 'package:receita/widget/form_ingrediente.dart';
 import 'package:receita/widget/form_utensilio.dart';
 import 'package:receita/widget/form_receita.dart';
 import 'package:receita/widget/form_receita_ingrediente.dart';
+import 'package:receita/widget/form_autor_rede_social.dart';
 
 // IMPORTS DAS LISTAS
 import 'package:receita/widget/listas/lista_categoria.dart';
@@ -19,8 +21,7 @@ import 'package:receita/widget/listas/lista_ingrediente.dart';
 import 'package:receita/widget/listas/lista_utensilio.dart';
 import 'package:receita/widget/listas/lista_receita.dart';
 import 'package:receita/widget/listas/lista_receita_ingrediente.dart';
-
-import 'package:receita/widget/menu_principal.dart';
+import 'package:receita/widget/listas/lista_autor_rede_social.dart';
 
 
 class ReceitaApp extends StatelessWidget {
@@ -42,6 +43,7 @@ class ReceitaApp extends StatelessWidget {
         Rotas.cadastroUtensilio: (context) => const FormUtensilio(),
         Rotas.cadastroReceita: (context) => const FormReceita(),
         Rotas.cadastroReceitaIngrediente: (context) => const FormReceitaIngrediente(),
+        Rotas.cadastroAutorRedeSocial: (context) => const FormAutorRedeSocial(),
 
         // LISTAS
         Rotas.listaCategorias: (context) => const ListaCategoria(),
@@ -51,6 +53,7 @@ class ReceitaApp extends StatelessWidget {
         Rotas.listaUtensilios: (context) => const ListaUtensilio(),
         Rotas.listaReceitas: (context) => const ListaReceita(),
         Rotas.listaReceitaIngredientes: (context) => const ListaReceitaIngrediente(),
+        Rotas.listaAutorRedeSocial: (context) => const ListaAutorRedeSocial(),
 
         Rotas.menuPrincipal: (context) => const MenuPrincipal(),
       },

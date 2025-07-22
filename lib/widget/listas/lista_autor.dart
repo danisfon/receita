@@ -46,11 +46,31 @@ class _ListaAutorState extends State<ListaAutor> {
   Widget _itemLista(DTOAutor dto) {
     return ListTile(
       title: Text(dto.nome),
-      trailing: IconButton(
-        icon: const Icon(Icons.delete, color: Colors.red),
-        onPressed: () => _excluir(dto),
+      subtitle: Text(dto.email),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.share, color: Colors.blue),
+            tooltip: 'Redes sociais',
+            onPressed: () => Navigator.pushNamed(
+              context,
+              Rotas.listaAutorRedeSocial,
+              arguments: dto,
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            tooltip: 'Excluir autor',
+            onPressed: () => _excluir(dto),
+          ),
+        ],
       ),
-      onTap: () => Navigator.pushNamed(context, Rotas.cadastroAutor, arguments: dto).then((_) => _carregar()),
+      onTap: () => Navigator.pushNamed(
+        context,
+        Rotas.cadastroAutor,
+        arguments: dto,
+      ).then((_) => _carregar()),
     );
   }
 
