@@ -3,6 +3,7 @@ import 'package:receita/banco/sqlite/dao/autor_dao.dart';
 import 'package:receita/dto/dto_autor.dart';
 import 'package:receita/widget/componentes/campos/comum/campo_texto.dart';
 import 'package:receita/widget/componentes/campos/comum/campo_email.dart';
+import 'package:receita/configuracao/rotas.dart';
 
 class FormAutor extends StatefulWidget {
   const FormAutor({super.key});
@@ -41,32 +42,34 @@ class _FormAutorState extends State<FormAutor> {
     }
   }
 
+  DTOAutor _criarDTO() {
+    return DTOAutor(
+      id: _id,
+      nome: _nomeController.text,
+      email: _emailController.text,
+      bio: _bioController.text.isEmpty ? null : _bioController.text,
+    );
+  }
+
   void _salvar() async {
     if (_formKey.currentState!.validate()) {
-      final autor = DTOAutor(
-        id: _id,
-        nome: _nomeController.text,
-        email: _emailController.text,
-        bio: _bioController.text.isEmpty ? null : _bioController.text,
-      );
-      await _dao.salvar(autor);
-      if (!mounted) return;
-      Navigator.of(context).pop();
+      try {
+        await _dao.salvar(_criarDTO());
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, Rotas.listaAutores);
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao salvar: \$e')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_id != null ? 'Editar Autor' : 'Novo Autor'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _salvar,
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(_id != null ? 'Editar Autor' : 'Novo Autor')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -89,6 +92,11 @@ class _FormAutorState extends State<FormAutor> {
                 controle: _bioController,
                 rotulo: 'Biografia (opcional)',
                 maxLinhas: 3,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _salvar,
+                child: const Text('Salvar'),
               ),
             ],
           ),

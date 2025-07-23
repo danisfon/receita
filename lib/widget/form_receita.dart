@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:receita/banco/sqlite/dao/receita_dao.dart';
-import 'package:receita/dto/dto_receita.dart';
 import 'package:receita/banco/sqlite/dao/categoria_dao.dart';
 import 'package:receita/banco/sqlite/dao/autor_dao.dart';
+import 'package:receita/configuracao/rotas.dart';
+import 'package:receita/dto/dto_receita.dart';
 import 'package:receita/dto/dto_categoria.dart';
 import 'package:receita/dto/dto_autor.dart';
 import 'package:receita/widget/componentes/campos/comum/campo_texto.dart';
@@ -16,13 +17,10 @@ class FormReceita extends StatefulWidget {
 }
 
 class _FormReceitaState extends State<FormReceita> {
-  final _formKey = GlobalKey<FormState>();
+  final _chaveFormulario = GlobalKey<FormState>();
   final _daoReceita = DAOReceita();
   final _daoCategoria = DAOCategoria();
   final _daoAutor = DAOAutor();
-
-  int? _id;
-  bool _errorLoading = false;
 
   final _nomeController = TextEditingController();
   final _modoPreparoController = TextEditingController();
@@ -32,14 +30,15 @@ class _FormReceitaState extends State<FormReceita> {
 
   DTOCategoria? _categoriaSelecionada;
   DTOAutor? _autorSelecionado;
+  int? _id;
+
+  bool _carregandoDados = true;
+  bool _erroAoCarregar = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _carregarDadosExtras();
-      _loadEditData();
-    });
+    _carregarDadosIniciais();
   }
 
   @override
@@ -49,45 +48,45 @@ class _FormReceitaState extends State<FormReceita> {
     super.dispose();
   }
 
-  Future<void> _carregarDadosExtras() async {
+  Future<void> _carregarDadosIniciais() async {
     try {
       final categorias = await _daoCategoria.buscarTodos();
       final autores = await _daoAutor.buscarTodos();
+
       setState(() {
         _categorias = categorias;
         _autores = autores;
+        _carregandoDados = false;
       });
-    } catch (_) {
+
+      _carregarDadosEdicao();
+    } catch (e) {
       setState(() {
-        _errorLoading = true;
+        _erroAoCarregar = true;
+        _carregandoDados = false;
       });
     }
   }
 
-  void _loadEditData() {
+  void _carregarDadosEdicao() {
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args != null && args is DTOReceita) {
       _id = args.id;
       _nomeController.text = args.nome;
       _modoPreparoController.text = args.modoPreparo;
-
-      final categoria = _categorias.firstWhere(
+      _categoriaSelecionada = _categorias.firstWhere(
         (c) => c.id == args.categoriaId,
-        orElse: () => DTOCategoria(id: 0, nome: 'Categoria inválida'),
+        orElse: () => _categorias.first,
       );
-      _categoriaSelecionada = categoria.id == 0 ? null : categoria;
 
-      final autor = _autores.firstWhere(
+      _autorSelecionado = _autores.firstWhere(
         (a) => a.id == args.autorId,
-        orElse: () => DTOAutor(id: 0, nome: 'Autor inválido', email: ''),
+        orElse: () => _autores.first,
       );
-      _autorSelecionado = autor.id == 0 ? null : autor;
-
-      setState(() => _errorLoading = false);
     }
   }
 
-  DTOReceita _createDTO() {
+  DTOReceita _criarDTO() {
     return DTOReceita(
       id: _id,
       nome: _nomeController.text,
@@ -97,8 +96,8 @@ class _FormReceitaState extends State<FormReceita> {
     );
   }
 
-  Future<void> _save() async {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _salvar() async {
+    if (_chaveFormulario.currentState!.validate()) {
       if (_categoriaSelecionada == null || _autorSelecionado == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Selecione uma categoria e um autor')),
@@ -107,17 +106,13 @@ class _FormReceitaState extends State<FormReceita> {
       }
 
       try {
-        final dto = _createDTO();
-        await _daoReceita.salvar(dto);
+        await _daoReceita.salvar(_criarDTO());
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_id == null ? 'Receita criada!' : 'Receita atualizada!')),
-        );
-        Navigator.of(context).pop();
+        Navigator.pushReplacementNamed(context, Rotas.listaReceitas);
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao salvar receita: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erro ao salvar: $e')),
         );
       }
     }
@@ -125,46 +120,43 @@ class _FormReceitaState extends State<FormReceita> {
 
   @override
   Widget build(BuildContext context) {
-    if (_errorLoading) {
+    if (_carregandoDados) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_erroAoCarregar) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Erro ao carregar receita')),
-        body: const Center(child: Text('Não foi possível carregar os dados.')),
+        appBar: AppBar(title: const Text('Erro')),
+        body: const Center(child: Text('Erro ao carregar dados.')),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_id == null ? 'Nova Receita' : 'Editar Receita'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _save,
-            tooltip: 'Salvar',
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Cadastro de Receita')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
-          key: _formKey,
+          key: _chaveFormulario,
           child: ListView(
             children: [
               CampoTexto(
                 controle: _nomeController,
-                rotulo: 'Nome',
-                dica: 'Nome da receita',
+                rotulo: 'Nome da Receita',
                 eObrigatorio: true,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               CampoDropdown<DTOCategoria>(
                 rotulo: 'Categoria',
                 valorSelecionado: _categoriaSelecionada,
                 listaItens: _categorias,
                 campoTextoItem: (item) => item.nome,
-                aoSelecionar: (val) => setState(() => _categoriaSelecionada = val),
+                aoSelecionar: (val) =>
+                    setState(() => _categoriaSelecionada = val),
                 eObrigatorio: true,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               CampoDropdown<DTOAutor>(
                 rotulo: 'Autor',
                 valorSelecionado: _autorSelecionado,
@@ -173,13 +165,17 @@ class _FormReceitaState extends State<FormReceita> {
                 aoSelecionar: (val) => setState(() => _autorSelecionado = val),
                 eObrigatorio: true,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               CampoTexto(
                 controle: _modoPreparoController,
-                rotulo: 'Modo de preparo',
-                dica: 'Descreva o modo de preparo',
-                eObrigatorio: true,
+                rotulo: 'Modo de Preparo',
                 maxLinhas: 5,
+                eObrigatorio: true,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _salvar,
+                child: const Text('Salvar'),
               ),
             ],
           ),
