@@ -62,7 +62,7 @@ class _ListaReceitaIngredienteState extends State<ListaReceitaIngrediente> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    nomeReceita,
+                    'Receita - $nomeReceita',
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
@@ -70,25 +70,27 @@ class _ListaReceitaIngredienteState extends State<ListaReceitaIngrediente> {
                     final quantidade = i.quantidade?.toString() ?? '';
                     final unidade = i.unidade ?? '';
                     final nomeIng = i.nomeIngrediente ?? '';
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Text('- $quantidade $unidade $nomeIng'),
+
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '* $quantidade ${unidade.isNotEmpty ? '$unidade - ' : ''}$nomeIng',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit, size: 20),
+                          onPressed: () => _editar(i),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, size: 20),
+                          onPressed: () => _excluir(i),
+                        ),
+                      ],
                     );
-                  }),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _editar(ingredientes.first),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () => _excluir(ingredientes.first),
-                      ),
-                    ],
-                  ),
+                  }).toList(),
                 ],
               ),
             ),
