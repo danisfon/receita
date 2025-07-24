@@ -1,7 +1,7 @@
-# Check 1 - Atividade
+# Check 1 - Desafios
 
 **Participantes:**  
-Ali Osmar Chehade, Daniele Fonseca
+Ali Osmar Chehade e Daniele Fonseca
 
 **Quantidade de desafios realizados:**  
 Resolvemos até o 4º desafio proposto juntos.
@@ -12,5 +12,5 @@ https://github.com/aliosmarchehade/spin_flow_desafio.git
 
 **(Opcional) Dificuldades e aprendizados:**  
 - Trabalho em equipe facilitou a resolução dos desafios.  
-- Aprendizado sobre integração de diferentes camadas no Flutter com SQLite.  
-- Organização do código e padronização dos formulários foram pontos importantes. (isso ajudou muito nos projeto de receitas)
+- Aprendizado sobre SQLite. (ficou mais facil de entender como funciona as conexões)  
+- Organização do código e padronização dos formulários. (isso ajudou muito no meu projeto pessoal - app de receitas)
