@@ -3,7 +3,7 @@ import 'package:receita/banco/sqlite/dao/autor_dao.dart';
 import 'package:receita/banco/sqlite/dao/autor_rede_social_dao.dart';
 import 'package:receita/dto/dto_autor.dart';
 import 'package:receita/dto/dto_autor_rede_social.dart';
-import 'package:receita/widget/componentes/campos//comum/botao_icone.dart';
+import 'package:receita/widget/componentes/campos/comum/botao_icone.dart';
 
 class ListaAutorRedeSocial extends StatefulWidget {
   const ListaAutorRedeSocial({super.key});
