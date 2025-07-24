@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:receita/banco/sqlite/dao/autor_dao.dart';
 import 'package:receita/banco/sqlite/dao/autor_rede_social_dao.dart';
+import 'package:receita/configuracao/rotas.dart';
+import 'package:receita/dto/dto_autor.dart';
 import 'package:receita/dto/dto_autor_rede_social.dart';
-import 'package:receita/banco/sqlite/dao/autor_dao.dart';  
-import 'package:receita/dto/dto_autor.dart';  
 import 'package:receita/widget/componentes/campos/comum/campo_texto.dart';
-import 'package:receita/widget/componentes/campos/comum/campo_dropdown.dart';
 
 class FormAutorRedeSocial extends StatefulWidget {
   const FormAutorRedeSocial({super.key});
@@ -14,63 +14,65 @@ class FormAutorRedeSocial extends StatefulWidget {
 }
 
 class _FormAutorRedeSocialState extends State<FormAutorRedeSocial> {
-  final _formKey = GlobalKey<FormState>();
-  final _daoRedeSocial = DAOAutorRedeSocial();
+  final _chaveFormulario = GlobalKey<FormState>();
+  final _dao = DAOAutorRedeSocial();
   final _daoAutor = DAOAutor();
-
-  int? _id;
-  DTOAutor? _autorSelecionado;
-  final TextEditingController _redeController = TextEditingController();
-  final TextEditingController _urlController = TextEditingController();
+  final TextEditingController _redeControlador = TextEditingController();
+  final TextEditingController _urlControlador = TextEditingController();
 
   List<DTOAutor> _autores = [];
-  bool _dadosCarregados = false;
-  bool _erroCarregamento = false;
+  DTOAutor? _autorSelecionado;
+  DTOAutorRedeSocial? _dtoRecebido;
+  int? _id;
+  bool _carregando = true;
+  bool _erro = false;
+
+  @override
+  void dispose() {
+    _redeControlador.dispose();
+    _urlControlador.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is DTOAutorRedeSocial) {
+      _dtoRecebido = args;
+      _id = args.id;
+      _redeControlador.text = args.rede;
+      _urlControlador.text = args.url;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _carregarAutores();
-      _carregarDadosEdicao();
-    });
-  }
-
-  @override
-  void dispose() {
-    _redeController.dispose();
-    _urlController.dispose();
-    super.dispose();
+    _carregarAutores();
   }
 
   Future<void> _carregarAutores() async {
     try {
-      final autores = await _daoAutor.buscarTodos();
+      final lista = await _daoAutor.buscarTodos();
       setState(() {
-        _autores = autores;
-        _dadosCarregados = true;
-        _erroCarregamento = false;
+        _autores = lista;
+        _erro = false;
+        if (_dtoRecebido != null) {
+          _autorSelecionado = lista.firstWhere(
+            (a) => a.id == _dtoRecebido!.autorId,
+            orElse: () => _autores.isNotEmpty ? _autores.first : DTOAutor(id: 0, nome: '', email: ''),
+          );
+        }
       });
     } catch (_) {
       setState(() {
-        _erroCarregamento = true;
+        _erro = true;
       });
-    }
-  }
-
-  void _carregarDadosEdicao() {
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args != null && args is DTOAutorRedeSocial) {
-      _id = args.id;
-      _redeController.text = args.rede;
-      _urlController.text = args.url;
-            _autorSelecionado = _autores.isNotEmpty
-          ? _autores.firstWhere(
-              (a) => a.id == args.autorId,
-              orElse: () => _autores.first,
-            )
-          : null;
-      setState(() {});
+    } finally {
+      setState(() {
+        _carregando = false;
+      });
     }
   }
 
@@ -78,97 +80,82 @@ class _FormAutorRedeSocialState extends State<FormAutorRedeSocial> {
     return DTOAutorRedeSocial(
       id: _id,
       autorId: _autorSelecionado!.id!,
-      rede: _redeController.text.trim(),
-      url: _urlController.text.trim(),
+      rede: _redeControlador.text,
+      url: _urlControlador.text,
     );
   }
 
   Future<void> _salvar() async {
-    if (_formKey.currentState!.validate()) {
-      if (_autorSelecionado == null) {
-        _mostrarMensagem('Selecione um autor.', erro: true);
-        return;
-      }
+    if (_chaveFormulario.currentState!.validate()) {
       try {
-        final dto = _criarDTO();
-        await _daoRedeSocial.salvar(dto);
+        await _dao.salvar(_criarDTO());
         if (!mounted) return;
-        _mostrarMensagem(_id == null ? 'Rede social cadastrada!' : 'Rede social atualizada!');
-        Navigator.of(context).pop();
+        Navigator.pushReplacementNamed(context, Rotas.listaAutorRedeSocial);
       } catch (e) {
-        _mostrarMensagem('Erro ao salvar: $e', erro: true);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao salvar: $e')),
+        );
       }
     }
-  }
-
-  void _mostrarMensagem(String mensagem, {bool erro = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: erro ? Colors.red : Colors.green,
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_erroCarregamento) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Erro')),
-        body: const Center(child: Text('Erro ao carregar os dados')),
-      );
-    }
-
-    if (!_dadosCarregados) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(_id == null ? 'Nova Rede Social do Autor' : 'Editar Rede Social do Autor'),
-        actions: [
-          IconButton(
-            onPressed: _salvar,
-            icon: const Icon(Icons.save),
-            tooltip: 'Salvar',
-          ),
-        ],
+        title: Text(_id == null ? 'Nova Rede Social' : 'Editar Rede Social'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              CampoDropdown<DTOAutor>(
-                rotulo: 'Autor',
-                valorSelecionado: _autorSelecionado,
-                listaItens: _autores,
-                campoTextoItem: (item) => item.nome,
-                aoSelecionar: (val) => setState(() => _autorSelecionado = val),
-                eObrigatorio: true,
-              ),
-              const SizedBox(height: 16),
-              CampoTexto(
-                controle: _redeController,
-                rotulo: 'Rede Social',
-                dica: 'Ex: Instagram, Twitter',
-                eObrigatorio: true,
-              ),
-              const SizedBox(height: 16),
-              CampoTexto(
-                controle: _urlController,
-                rotulo: 'URL',
-                dica: 'Ex: https://instagram.com/usuario',
-                eObrigatorio: true,
-                tipoTeclado: TextInputType.url,
-              ),
-            ],
-          ),
-        ),
-      ),
+      body: _carregando
+          ? const Center(child: CircularProgressIndicator())
+          : _erro
+              ? const Center(child: Text('Erro ao carregar autores.'))
+              : Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Form(
+                    key: _chaveFormulario,
+                    child: Column(
+                      children: [
+                        DropdownButtonFormField<DTOAutor>(
+                          value: _autorSelecionado,
+                          items: _autores
+                              .map((autor) => DropdownMenuItem(
+                                    value: autor,
+                                    child: Text(autor.nome),
+                                  ))
+                              .toList(),
+                          onChanged: (valor) {
+                            setState(() {
+                              _autorSelecionado = valor;
+                            });
+                          },
+                          decoration: const InputDecoration(
+                            labelText: 'Autor',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (valor) => valor == null ? 'Selecione um autor' : null,
+                        ),
+                        const SizedBox(height: 12),
+                        CampoTexto(
+                          controle: _redeControlador,
+                          rotulo: 'Rede Social',
+                          eObrigatorio: true,
+                        ),
+                        const SizedBox(height: 12),
+                        CampoTexto(
+                          controle: _urlControlador,
+                          rotulo: 'URL',
+                          eObrigatorio: true,
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: _salvar,
+                          child: const Text('Salvar'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
     );
   }
 }

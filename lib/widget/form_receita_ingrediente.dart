@@ -7,6 +7,7 @@ import 'package:receita/dto/dto_receita.dart';
 import 'package:receita/dto/dto_ingrediente.dart';
 import 'package:receita/widget/componentes/campos/comum/campo_texto.dart';
 import 'package:receita/widget/componentes/campos/comum/campo_dropdown.dart';
+import 'package:receita/configuracao/rotas.dart';
 
 class FormReceitaIngrediente extends StatefulWidget {
   const FormReceitaIngrediente({super.key});
@@ -67,22 +68,16 @@ class _FormReceitaIngredienteState extends State<FormReceitaIngrediente> {
   void _carregarDadosEdicao() {
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args != null && args is DTOReceitaIngrediente) {
-      try {
-        _id = args.id;
-        _quantidadeController.text = args.quantidade?.toString() ?? '';
-        _receitaSelecionada = _receitas.firstWhere(
-          (r) => r.id == args.receitaId,
-          orElse: () => DTOReceita(id: 0, nome: 'Inválido', modoPreparo: '', categoriaId: 0, autorId: 0),
-        );
-        _ingredienteSelecionado = _ingredientes.firstWhere(
-          (i) => i.id == args.ingredienteId,
-          orElse: () => DTOIngrediente(id: 0, nome: 'Inválido'),
-        );
-      } catch (_) {
-        setState(() {
-          _erroCarregamento = true;
-        });
-      }
+      _id = args.id;
+      _quantidadeController.text = args.quantidade?.toString() ?? '';
+      _receitaSelecionada = _receitas.firstWhere(
+        (r) => r.id == args.receitaId,
+        orElse: () => DTOReceita(id: 0, nome: 'Inválido', modoPreparo: '', categoriaId: 0, autorId: 0),
+      );
+      _ingredienteSelecionado = _ingredientes.firstWhere(
+        (i) => i.id == args.ingredienteId,
+        orElse: () => DTOIngrediente(id: 0, nome: 'Inválido'),
+      );
     }
   }
 
@@ -102,11 +97,9 @@ class _FormReceitaIngredienteState extends State<FormReceitaIngrediente> {
         return;
       }
       try {
-        final dto = _criarDTO();
-        await _dao.salvar(dto);
+        await _dao.salvar(_criarDTO());
         if (!mounted) return;
-        _mostrarMensagem(_id == null ? 'Associação criada!' : 'Associação atualizada!');
-        Navigator.of(context).pop();
+        Navigator.pushReplacementNamed(context, Rotas.listaReceitaIngredientes);
       } catch (e) {
         _mostrarMensagem('Erro ao salvar: $e', erro: true);
       }
@@ -140,19 +133,12 @@ class _FormReceitaIngredienteState extends State<FormReceitaIngrediente> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_id == null ? 'Nova Associação' : 'Editar Associação'),
-        actions: [
-          IconButton(
-            onPressed: _salvar,
-            icon: const Icon(Icons.save),
-            tooltip: 'Salvar',
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
             children: [
               CampoDropdown<DTOReceita>(
                 rotulo: 'Receita',
@@ -178,6 +164,11 @@ class _FormReceitaIngredienteState extends State<FormReceitaIngrediente> {
                 dica: 'Ex: 2.5 (em números)',
                 eObrigatorio: true,
                 tipoTeclado: TextInputType.number,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _salvar,
+                child: const Text('Salvar'),
               ),
             ],
           ),
