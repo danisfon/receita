@@ -21,7 +21,7 @@ Os arquivos a seguir contemplam as funcionalidades desenvolvidas no check dois, 
 **Entidade: ReceitaIngrediente**  
 - `lib/widget/form_receita_ingrediente.dart`  
 - `lib/dto/dto_receita_ingrediente.dart`  
-- `lib/banco/sqlite/dao/lista_autor_rede_social.dart`  
+- `lib/banco/sqlite/dao/autor_rede_social_dao.dart`  
 - `lib/listas/lista_receita_ingrediente.dart`
 
 ---
