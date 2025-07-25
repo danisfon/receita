@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:receita/banco/sqlite/dao/autor_dao.dart';
 import 'package:receita/dto/dto_autor.dart';
 import 'package:receita/configuracao/rotas.dart';
+import 'package:receita/widget/componentes/campos/comum/botao_icone.dart';
+import 'package:receita/widget/componentes/campos/comum/titulo_lista.dart';
 
 class ListaAutor extends StatefulWidget {
   const ListaAutor({super.key});
@@ -25,8 +27,7 @@ class _ListaAutorState extends State<ListaAutor> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Autores'),
-        actions: [IconButton(onPressed: _carregar, icon: const Icon(Icons.refresh))],
+        title: const TituloLista(titulo: 'Autores'),
       ),
       body: _carregando
           ? const Center(child: CircularProgressIndicator())
@@ -37,7 +38,8 @@ class _ListaAutorState extends State<ListaAutor> {
                   itemBuilder: (context, index) => _itemLista(_itens[index]),
                 ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, Rotas.cadastroAutor).then((_) => _carregar()),
+        onPressed: () => Navigator.pushNamed(context, Rotas.cadastroAutor)
+            .then((_) => _carregar()),
         child: const Icon(Icons.add),
       ),
     );
@@ -50,19 +52,28 @@ class _ListaAutorState extends State<ListaAutor> {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-            icon: const Icon(Icons.share, color: Colors.blue),
+          BotaoIcone(
+            icone: Icons.share,
             tooltip: 'Redes sociais',
-            onPressed: () => Navigator.pushNamed(
+            aoPressionar: () => Navigator.pushNamed(
               context,
               Rotas.listaAutorRedeSocial,
               arguments: dto,
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            tooltip: 'Excluir autor',
-            onPressed: () => _excluir(dto),
+          BotaoIcone(
+            icone: Icons.edit,
+            tooltip: 'Editar',
+            aoPressionar: () => Navigator.pushNamed(
+              context,
+              Rotas.cadastroAutor,
+              arguments: dto,
+            ).then((_) => _carregar()),
+          ),
+          BotaoIcone(
+            icone: Icons.delete,
+            tooltip: 'Excluir',
+            aoPressionar: () => _excluir(dto),
           ),
         ],
       ),
