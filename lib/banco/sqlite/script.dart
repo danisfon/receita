@@ -71,6 +71,16 @@ class ScriptSQLite {
       url TEXT NOT NULL,
       FOREIGN KEY(autor_id) REFERENCES autor(id)
     );
+    ''',
+    '''
+    CREATE TABLE autor_receita_favorita (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      autor_id INTEGER NOT NULL,
+      receita_id INTEGER NOT NULL,
+      FOREIGN KEY(autor_id) REFERENCES autor(id),
+      FOREIGN KEY(receita_id) REFERENCES receita(id),
+      UNIQUE(autor_id, receita_id)
+    );
     '''
   ];
 
