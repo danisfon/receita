@@ -35,7 +35,7 @@ Um aplicativo Flutter para gerenciar receitas culinárias, com cadastro e listag
 
 ```bash
 # Clone o projeto
-git clone https://github.com/seu-usuario/receita_app.git
+git clone https://github.com/danisfon/receita_app.git
 cd receita_app
 
 # Instale as dependências
@@ -43,4 +43,5 @@ flutter pub get
 
 # Execute no emulador ou dispositivo conectado
 flutter run
+
 
