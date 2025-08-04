@@ -31,5 +31,8 @@ class Rotas {
   // Associação N:N
   static const String cadastroReceitaIngrediente = '/cadastro-ingrediente-por-receita';
   static const String listaReceitaIngredientes = '/lista-ingredientes-por-receita';
+
+  static const String cadastroAutorReceitaFavorita = '/cadastro-receita-favorita-por-autor';
+  static const String listaAutorReceitaFavorita = '/lista-receitas-favoritas-por-autor';
   
 }

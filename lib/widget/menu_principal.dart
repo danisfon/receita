@@ -21,6 +21,7 @@ class MenuPrincipal extends StatelessWidget {
           _botao(context, 'Receitas', Rotas.listaReceitas),
           _botao(context, 'Ingredientes por Receita', Rotas.listaReceitaIngredientes),
           _botao(context, 'Redes Sociais de Autores', Rotas.listaAutorRedeSocial),
+          _botao(context, 'Receita favorita do Autores', Rotas.listaAutorReceitaFavorita),
 
           const Divider(height: 32),
           const Text('Cadastrar Novo', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
@@ -33,6 +34,7 @@ class MenuPrincipal extends StatelessWidget {
           _botao(context, 'Cadastrar Receita', Rotas.cadastroReceita),
           _botao(context, 'Cadastrar Ingredientes por Receita', Rotas.cadastroReceitaIngrediente),
           _botao(context, 'Cadastrar Rede Social do Autor', Rotas.cadastroAutorRedeSocial),
+          _botao(context, 'Cadastrar Receita favorita do Autor', Rotas.cadastroAutorReceitaFavorita),
         ],
       ),
     );

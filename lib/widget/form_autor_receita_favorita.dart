@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:receita/banco/sqlite/dao/dao_autor.dart';
-import 'package:receita/banco/sqlite/dao/dao_receita.dart';
-import 'package:receita/banco/sqlite/dao/dao_autor_receita_favorita.dart';
+import 'package:receita/banco/sqlite/dao/autor_dao.dart';
+import 'package:receita/banco/sqlite/dao/receita_dao.dart';
+import 'package:receita/banco/sqlite/dao/autor_receita_favorita_dao.dart';
 import 'package:receita/dto/dto_autor.dart';
 import 'package:receita/dto/dto_receita.dart';
 import 'package:receita/dto/dto_autor_receita_favorita.dart';

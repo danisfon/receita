@@ -85,16 +85,50 @@ class ScriptSQLite {
   ];
 
   static List<List<String>> comandosInsercoes = [
+    // categoria
     [
-      "INSERT INTO categoria (nome, descricao) VALUES ('Sobremesa', 'Doces em geral');",
-      "INSERT INTO categoria (nome, descricao) VALUES ('Prato principal', 'Almoço ou jantar');",
+      "INSERT INTO categoria (id, nome, descricao) VALUES (1, 'Sobremesa', 'Doces em geral');",
+      "INSERT INTO categoria (id, nome, descricao) VALUES (2, 'Prato principal', 'Almoço ou jantar');",
     ],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
+    // autor
+    [
+      "INSERT INTO autor (id, nome, email, bio) VALUES (1, 'Maria Silva', 'maria@email.com', 'Chef especialista em sobremesas.');",
+      "INSERT INTO autor (id, nome, email, bio) VALUES (2, 'João Souza', 'joao@email.com', 'Amante da culinária brasileira.');",
+    ],
+    // ingrediente
+    [
+      "INSERT INTO ingrediente (id, nome, tipo, quantidade_padrao, unidade) VALUES (1, 'Leite condensado', 'Laticínio', 395, 'gramas');",
+      "INSERT INTO ingrediente (id, nome, tipo, quantidade_padrao, unidade) VALUES (2, 'Morango', 'Fruta', 100, 'gramas');",
+    ],
+    // utensilio
+    [
+      "INSERT INTO utensilio (id, nome, material, observacao) VALUES (1, 'Tigela', 'Vidro', 'Ideal para misturas frias.');",
+      "INSERT INTO utensilio (id, nome, material, observacao) VALUES (2, 'Panela', 'Alumínio', 'Boa para caldas.');",
+    ],
+    // dica
+    [
+      "INSERT INTO dica (id, titulo, descricao) VALUES (1, 'Use ingredientes frescos', 'Sempre que possível utilize frutas frescas.');",
+      "INSERT INTO dica (id, titulo, descricao) VALUES (2, 'Pré-aqueça o forno', 'Pré-aqueça por pelo menos 10 minutos antes de usar.');",
+    ],
+    // receita
+    [
+      "INSERT INTO receita (id, nome, modo_preparo, tempo_preparo, categoria_id, autor_id) VALUES (1, 'Mousse de Morango', 'Misture tudo e leve à geladeira.', 20, 1, 1);",
+      "INSERT INTO receita (id, nome, modo_preparo, tempo_preparo, categoria_id, autor_id) VALUES (2, 'Feijoada', 'Cozinhe tudo por 3 horas.', 180, 2, 2);",
+    ],
+    // receita_ingrediente
+    [
+      "INSERT INTO receita_ingrediente (id, receita_id, ingrediente_id, quantidade, unidade) VALUES (1, 1, 1, 395, 'gramas');",
+      "INSERT INTO receita_ingrediente (id, receita_id, ingrediente_id, quantidade, unidade) VALUES (2, 1, 2, 100, 'gramas');",
+    ],
+    // autor_rede_social
+    [
+      "INSERT INTO autor_rede_social (id, autor_id, rede, url) VALUES (1, 1, 'Instagram', 'https://instagram.com/maria');",
+      "INSERT INTO autor_rede_social (id, autor_id, rede, url) VALUES (2, 2, 'YouTube', 'https://youtube.com/joaosouza');",
+    ],
+    // autor_receita_favorita
+    [
+      "INSERT INTO autor_receita_favorita (id, autor_id, receita_id) VALUES (1, 1, 1);",
+      "INSERT INTO autor_receita_favorita (id, autor_id, receita_id) VALUES (2, 2, 2);",
+    ],
   ];
 }
