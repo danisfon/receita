@@ -8,11 +8,11 @@ Este documento descreve a pontuação de complexidade atingida pelo projeto, com
 |-----------|----------------|----------------------|
 | **Cadastro simples** | 5 | `form_categoria.dart`, `form_ingrediente.dart`, `form_autor.dart`, `form_utensilio.dart`, `form_dica.dart`. |
 | **Cadastro com associação (1:N)** | 6 | `form_receita.dart`, `form_autor_rede_social.dart`. |
-| **Cadastro com associação (N:N)** | 6 | `form_receita_ingrediente.dart`. |
+| **Cadastro com associação (N:N)** | 12 | `form_receita_ingrediente.dart`. `form_autor_receita_favorita`|
 | **Componentização com campo de opções inteligentes** | 2 | `lib/widget/componentes/campos/comum/`. |
 
 ---
 
-### ✅ Total: **19 pontos**
+### ✅ Total: **25 pontos**
 
 ---
