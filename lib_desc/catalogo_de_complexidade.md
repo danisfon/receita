@@ -14,6 +14,6 @@ Este documento descreve a pontuação de complexidade atingida pelo projeto, com
 
 ---
 
-### ✅ Total: **25 pontos**
+### ✅ Total: **29 pontos**
 
 ---
