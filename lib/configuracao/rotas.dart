@@ -34,5 +34,7 @@ class Rotas {
 
   static const String cadastroAutorReceitaFavorita = '/cadastro-receita-favorita-por-autor';
   static const String listaAutorReceitaFavorita = '/lista-receitas-favoritas-por-autor';
-  
+
+  // Receitas por categoria (nova rota)
+  static const String receitasPorCategoria = '/receitas-por-categoria';
 }
