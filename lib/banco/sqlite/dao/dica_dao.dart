@@ -6,10 +6,10 @@ class DAODica {
 
   Future<int> salvar(DTODica dica) async {
     final db = await ConexaoSQLite.database;
-
     final dados = {
-      'titulo': dica.nome,
-      'descricao': dica.descricao ?? '',
+      'titulo': dica.titulo,
+      'descricao': dica.descricao,
+      'autor_id': dica.autorId,
     };
 
     if (dica.id != null) {
@@ -25,29 +25,15 @@ class DAODica {
 
     return resultado.map((linha) {
       return DTODica(
-        id: linha['id'] as int?,
-        nome: linha['titulo'] as String,
+        id: linha['id'] as int,
+        titulo: linha['titulo'] as String,
         descricao: linha['descricao'] as String,
+        autorId: linha['autor_id'] as int,
       );
     }).toList();
   }
 
-  Future<DTODica?> buscarPorId(int id) async {
-    final db = await ConexaoSQLite.database;
-    final resultado = await db.query(_tabela, where: 'id = ?', whereArgs: [id]);
-
-    if (resultado.isNotEmpty) {
-      final linha = resultado.first;
-      return DTODica(
-        id: linha['id'] as int?,
-        nome: linha['titulo'] as String,
-        descricao: linha['descricao'] as String,
-      );
-    }
-    return null;
-  }
-
-  Future<int> excluir(int id) async {
+  Future<int> excluirPorId(int id) async {
     final db = await ConexaoSQLite.database;
     return await db.delete(_tabela, where: 'id = ?', whereArgs: [id]);
   }

@@ -36,8 +36,11 @@ class ScriptSQLite {
     CREATE TABLE dica (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       titulo TEXT NOT NULL,
-      descricao TEXT NOT NULL
+      descricao TEXT NOT NULL,
+      autor_id INTEGER NOT NULL,
+      FOREIGN KEY(autor_id) REFERENCES autor(id)
     );
+
     ''',
     '''
     CREATE TABLE receita (
@@ -107,8 +110,7 @@ class ScriptSQLite {
     ],
     // dica
     [
-      "INSERT INTO dica (id, titulo, descricao) VALUES (1, 'Use ingredientes frescos', 'Sempre que possível utilize frutas frescas.');",
-      "INSERT INTO dica (id, titulo, descricao) VALUES (2, 'Pré-aqueça o forno', 'Pré-aqueça por pelo menos 10 minutos antes de usar.');",
+      "INSERT INTO dica (id, titulo, descricao, autor_id) VALUES (1, 'Use ingredientes frescos', 'Sempre prefira ingredientes frescos para realçar o sabor.', 1), (2, 'Pré-aqueça o forno', 'Sempre pré-aqueça o forno para garantir o cozimento uniforme.', 1);",
     ],
     // receita
     [
