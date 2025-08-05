@@ -16,6 +16,7 @@ dependencies:
   sqflite_common_ffi: any
   sqflite_common_ffi_web: ^0.4.5+4
   cupertino_icons: ^1.0.8
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:

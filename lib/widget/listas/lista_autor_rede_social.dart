@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:receita/banco/sqlite/dao/autor_dao.dart';
 import 'package:receita/banco/sqlite/dao/autor_rede_social_dao.dart';
 import 'package:receita/dto/dto_autor.dart';
+import 'package:receita/configuracao/rotas.dart';
 import 'package:receita/dto/dto_autor_rede_social.dart';
 import 'package:receita/widget/componentes/campos/comum/botao_icone.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ListaAutorRedeSocial extends StatefulWidget {
   const ListaAutorRedeSocial({super.key});
@@ -54,8 +56,12 @@ class _ListaAutorRedeSocialState extends State<ListaAutorRedeSocial> {
         title: const Text('Confirmar exclusão'),
         content: const Text('Deseja excluir esta rede social?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Excluir')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Excluir')),
         ],
       ),
     );
@@ -67,15 +73,28 @@ class _ListaAutorRedeSocialState extends State<ListaAutorRedeSocial> {
   }
 
   void _navegarParaEdicao(DTOAutorRedeSocial dto) {
-    Navigator.of(context).pushNamed('/form_autor_rede_social', arguments: dto).then((_) {
+    Navigator.of(context)
+        .pushNamed(Rotas.cadastroAutorRedeSocial, arguments: dto)
+        .then((_) {
       _carregarDados();
     });
   }
 
   void _navegarParaCadastro() {
-    Navigator.of(context).pushNamed('/form_autor_rede_social').then((_) {
+    Navigator.of(context).pushNamed(Rotas.cadastroAutorRedeSocial).then((_) {
       _carregarDados();
     });
+  }
+
+  Future<void> _abrirUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri != null && await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível abrir o link.')),
+      );
+    }
   }
 
   @override
@@ -113,7 +132,8 @@ class _ListaAutorRedeSocialState extends State<ListaAutorRedeSocial> {
                 final autor = _autoresMap[dto.autorId];
 
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   elevation: 3,
                   child: ListTile(
                     title: Text(dto.rede),
@@ -127,6 +147,12 @@ class _ListaAutorRedeSocialState extends State<ListaAutorRedeSocial> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        BotaoIcone(
+                          icone: Icons.link,
+                          tooltip: 'Abrir Rede Social',
+                          aoPressionar: () => _abrirUrl(dto.url),
+                        ),
+                        const SizedBox(width: 8),
                         BotaoIcone(
                           icone: Icons.edit,
                           tooltip: 'Editar',
