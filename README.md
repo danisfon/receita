@@ -8,14 +8,16 @@ Um aplicativo Flutter para gerenciar receitas culinárias, com cadastro e listag
 - Ingredientes
 - Utensílios
 - Receitas
-- Associação de Ingredientes por Receita
+- Ingredientes por Receita
+- Rede Sociais dos autores
+- Comentérios/Avaliações das Receitas
+- Receita Favorita de cada autor
 
 ---
 
 ## 📱 Funcionalidades
 
 - CRUD completo (Criar, Ler, Atualizar, Excluir) para todas as entidades
-- Associação entre receitas e ingredientes com quantidade e unidade
 - Interface simples e intuitiva
 - Armazenamento local com SQLite
 - Separação clara entre DTOs, DAOs, formulários e listagens
@@ -43,5 +45,6 @@ flutter pub get
 
 # Execute no emulador ou dispositivo conectado
 flutter run
+
 
 
