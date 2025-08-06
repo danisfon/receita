@@ -17,15 +17,18 @@ class Rotas {
   static const String cadastroAutor = '/cadastro-autor';
   static const String listaAutores = '/lista-autores';
 
-  static const String cadastroDica = '/cadastro-dica';
-  static const String listaDicas = '/lista-dicas';
-
   // Associação 1:N
   static const String cadastroReceita = '/cadastro-receita';
   static const String listaReceitas = '/lista-receitas';
 
   static const String cadastroAutorRedeSocial = '/cadastro-autor-rede-social';
   static const String listaAutorRedeSocial = '/lista-autor-rede-social';
+
+  static const String cadastroDica = '/cadastro-dica';
+  static const String listaDicas = '/lista-dicas';
+
+  static const String cadastroComentario = '/cadastro-comentario';
+  static const String listaComentario = '/lista-comentario';
 
 
   // Associação N:N

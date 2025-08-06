@@ -29,7 +29,7 @@ class _ListaReceitasPorCategoriaState extends State<ListaReceitasPorCategoria> {
 
   Future<void> _buscarReceitasComIngredientes() async {
     try {
-      final db = await ConexaoSQLite.abrir();
+      final db = await ConexaoSQLite.database;
 
       final resultado = await db.rawQuery('''
         SELECT 

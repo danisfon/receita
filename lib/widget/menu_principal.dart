@@ -53,6 +53,8 @@ class _AbaListagens extends StatelessWidget {
         _botao(context, 'Redes Sociais de Autores', Rotas.listaAutorRedeSocial),
         _botao(context, 'Receita favorita dos Autores',
             Rotas.listaAutorReceitaFavorita),
+        _botao(context, 'Avaliações das receitas',
+            Rotas.listaComentario),
       ],
     );
   }
@@ -81,6 +83,8 @@ class _AbaCadastros extends StatelessWidget {
             Rotas.cadastroAutorRedeSocial),
         _botao(context, 'Cadastrar Receita Favorita do Autor',
             Rotas.cadastroAutorReceitaFavorita),
+        _botao(context, 'Cadastrar Avalicao de receita',
+            Rotas.cadastroComentario),
       ],
     );
   }
