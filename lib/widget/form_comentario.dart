@@ -53,18 +53,16 @@ class _FormComentarioState extends State<FormComentario> {
         _textoControlador.text = comentario.texto;
         _notaControlador.text = comentario.nota.toString();
 
-        if (receitas.isNotEmpty) {
-          _receitaSelecionada = receitas.firstWhere(
-            (r) => r.id == comentario.receitaId,
-            orElse: () => receitas.first,
-          );
+        if (receitas.any((r) => r.id == comentario.receitaId)) {
+          _receitaSelecionada = receitas.firstWhere((r) => r.id == comentario.receitaId);
+        } else {
+          _receitaSelecionada = receitas.isNotEmpty ? receitas.first : null;
         }
 
-        if (autores.isNotEmpty) {
-          _autorSelecionado = autores.firstWhere(
-            (a) => a.id == comentario.autorId,
-            orElse: () => autores.first,
-          );
+        if (autores.any((a) => a.id == comentario.autorId)) {
+          _autorSelecionado = autores.firstWhere((a) => a.id == comentario.autorId);
+        } else {
+          _autorSelecionado = autores.isNotEmpty ? autores.first : null;
         }
       }
     });
@@ -91,6 +89,7 @@ class _FormComentarioState extends State<FormComentario> {
                       eObrigatorio: true,
                       maxLinhas: 3,
                     ),
+                    const SizedBox(height: 16),
                     CampoTexto(
                       controle: _notaControlador,
                       rotulo: 'Nota',
@@ -98,6 +97,7 @@ class _FormComentarioState extends State<FormComentario> {
                       tipoTeclado: TextInputType.number,
                       eObrigatorio: true,
                     ),
+                    const SizedBox(height: 16),
                     CampoDropdown<DTOReceita>(
                       rotulo: 'Receita',
                       valorSelecionado: _receitaSelecionada,
@@ -106,6 +106,7 @@ class _FormComentarioState extends State<FormComentario> {
                       aoSelecionar: (r) => setState(() => _receitaSelecionada = r),
                       eObrigatorio: true,
                     ),
+                    const SizedBox(height: 16),
                     CampoDropdown<DTOAutor>(
                       rotulo: 'Autor',
                       valorSelecionado: _autorSelecionado,
@@ -114,10 +115,13 @@ class _FormComentarioState extends State<FormComentario> {
                       aoSelecionar: (a) => setState(() => _autorSelecionado = a),
                       eObrigatorio: true,
                     ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _salvar,
-                      child: const Text('Salvar'),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _salvar,
+                        child: const Text('Salvar'),
+                      ),
                     ),
                   ],
                 ),
@@ -129,20 +133,28 @@ class _FormComentarioState extends State<FormComentario> {
   Future<void> _salvar() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final novoComentario = DTOComentario(
-      id: _id,
-      texto: _textoControlador.text,
-      nota: int.parse(_notaControlador.text),
-      receitaId: _receitaSelecionada!.id!,
-      autorId: _autorSelecionado!.id!,
-    );
+    try {
+      final novoComentario = DTOComentario(
+        id: _id,
+        texto: _textoControlador.text.trim(),
+        nota: int.parse(_notaControlador.text),
+        receitaId: _receitaSelecionada!.id!,
+        autorId: _autorSelecionado!.id!,
+      );
 
-    if (_id == null) {
-      await _dao.inserir(novoComentario);
-    } else {
-      await _dao.atualizar(novoComentario);
+      if (_id == null) {
+        await _dao.inserir(novoComentario);
+      } else {
+        await _dao.atualizar(novoComentario);
+      }
+
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao salvar comentário')),
+        );
+      }
     }
-
-    if (mounted) Navigator.pop(context);
   }
 }
