@@ -84,6 +84,17 @@ class ScriptSQLite {
       FOREIGN KEY(receita_id) REFERENCES receita(id),
       UNIQUE(autor_id, receita_id)
     );
+    ''',
+    '''
+    CREATE TABLE comentario (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      receita_id INTEGER NOT NULL,
+      autor_id INTEGER NOT NULL,
+      texto TEXT NOT NULL,
+      nota INTEGER NOT NULL CHECK (nota >= 1 AND nota <= 5),
+      FOREIGN KEY (receita_id) REFERENCES receita (id),
+      FOREIGN KEY (autor_id) REFERENCES autor (id)
+    );
     '''
   ];
 
@@ -131,6 +142,10 @@ class ScriptSQLite {
     [
       "INSERT INTO autor_receita_favorita (id, autor_id, receita_id) VALUES (1, 1, 1);",
       "INSERT INTO autor_receita_favorita (id, autor_id, receita_id) VALUES (2, 2, 2);",
+    ],
+    // comentario
+    [
+      "INSERT INTO comentario (receita_id, autor_id, texto, nota) VALUES (1, 1, 'Receita maravilhosa! Fiz e todos adoraram.', 5), (2, 1, 'Muito boa, só achei o tempo de forno exagerado.', 4), (1, 2, 'Faltou sal, mas a base é ótima.', 3);",
     ],
   ];
 }
