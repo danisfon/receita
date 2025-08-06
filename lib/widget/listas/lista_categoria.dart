@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:receita/banco/sqlite/dao/categoria_dao.dart';
-import 'package:receita/dto/dto_categoria.dart';
 import 'package:receita/configuracao/rotas.dart';
+import 'package:receita/dto/dto_categoria.dart';
+import 'package:receita/banco/sqlite/dao/categoria_dao.dart';
+import 'package:receita/widget/componentes/campos/comum/botao_icone.dart';
+import 'package:receita/widget/componentes/campos/comum/titulo_lista.dart';
 
 class ListaCategoria extends StatefulWidget {
   const ListaCategoria({super.key});
@@ -12,80 +14,70 @@ class ListaCategoria extends StatefulWidget {
 
 class _ListaCategoriaState extends State<ListaCategoria> {
   final _dao = DAOCategoria();
-  List<DTOCategoria> _categorias = [];
+  List<DTOCategoria> _lista = [];
   bool _carregando = true;
 
   @override
   void initState() {
     super.initState();
-    _carregarCategorias();
+    _carregar();
   }
 
-  Future<void> _carregarCategorias() async {
-    try {
-      final lista = await _dao.buscarTodos();
-      setState(() {
-        _categorias = lista;
-        _carregando = false;
-      });
-    } catch (_) {
-      setState(() => _carregando = false);
+  Future<void> _carregar() async {
+    setState(() => _carregando = true);
+    _lista = await _dao.buscarTodos();
+    setState(() => _carregando = false);
+  }
+
+  Future<void> _excluir(DTOCategoria dto) async {
+    if (dto.id == null) {
+      throw Exception('ID da categoria é nulo e não pode ser excluído.');
     }
-  }
-
-  Future<void> _excluirCategoria(int id) async {
-    await _dao.excluir(id);
-    _carregarCategorias();
+    await _dao.excluir(dto.id!);
+    _carregar();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Categorias'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _carregarCategorias,
-          )
-        ],
-      ),
+      appBar: AppBar(title: const TituloLista(titulo: 'Categorias')),
       body: _carregando
           ? const Center(child: CircularProgressIndicator())
-          : _categorias.isEmpty
-              ? const Center(child: Text('Nenhuma categoria cadastrada'))
+          : _lista.isEmpty
+              ? const Center(child: Text('Nenhuma categoria encontrada'))
               : ListView.builder(
-                  itemCount: _categorias.length,
+                  itemCount: _lista.length,
                   itemBuilder: (context, index) {
-                    final categoria = _categorias[index];
-                    return ListTile(
-                      title: Text(categoria.nome),
-                      // Removido o subtitle que usava categoria.ativo
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.orange),
-                            onPressed: () {
-                              Navigator.pushNamed(
+                    final dto = _lista[index];
+                    return Card(
+                      child: ListTile(
+                        title: Text(dto.nome),
+                        trailing: Wrap(
+                          spacing: 8,
+                          children: [
+                            BotaoIcone(
+                              icone: Icons.edit,
+                              tooltip: 'Editar',
+                              aoPressionar: () => Navigator.pushNamed(
                                 context,
                                 Rotas.cadastroCategoria,
-                                arguments: categoria,
-                              ).then((_) => _carregarCategorias());
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _excluirCategoria(categoria.id!),
-                          ),
-                        ],
+                                arguments: dto,
+                              ).then((_) => _carregar()),
+                            ),
+                            BotaoIcone(
+                              icone: Icons.delete,
+                              tooltip: 'Excluir',
+                              aoPressionar: () => _excluir(dto),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
                 ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, Rotas.cadastroCategoria)
-            .then((_) => _carregarCategorias()),
+            .then((_) => _carregar()),
         child: const Icon(Icons.add),
       ),
     );
