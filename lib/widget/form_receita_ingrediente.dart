@@ -96,15 +96,21 @@ class _FormReceitaIngredienteState extends State<FormReceitaIngrediente> {
         _mostrarMensagem('Selecione a receita e o ingrediente.', erro: true);
         return;
       }
+
       try {
         await _dao.salvar(_criarDTO());
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, Rotas.listaReceitaIngredientes);
       } catch (e) {
-        _mostrarMensagem('Erro ao salvar: $e', erro: true);
+        if (e.toString().contains('UNIQUE constraint failed')) {
+          _mostrarMensagem('Essa receita já possui esse ingrediente.', erro: true);
+        } else {
+          _mostrarMensagem('Erro ao salvar: $e', erro: true);
+        }
       }
     }
   }
+
 
   void _mostrarMensagem(String mensagem, {bool erro = false}) {
     ScaffoldMessenger.of(context).showSnackBar(

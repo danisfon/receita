@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:receita/configuracao/rotas.dart';
+import 'package:receita/banco/sqlite/dao/categoria_dao.dart';
+import 'package:receita/dto/dto_categoria.dart';
 
 class MenuPrincipal extends StatelessWidget {
   const MenuPrincipal({super.key});
@@ -48,13 +50,10 @@ class _AbaListagens extends StatelessWidget {
         _botao(context, 'Ingredientes', Rotas.listaIngredientes),
         _botao(context, 'Utensílios', Rotas.listaUtensilios),
         _botao(context, 'Receitas', Rotas.listaReceitas),
-        _botao(context, 'Ingredientes por Receita',
-            Rotas.listaReceitaIngredientes),
+        _botao(context, 'Ingredientes por Receita', Rotas.listaReceitaIngredientes),
         _botao(context, 'Redes Sociais de Autores', Rotas.listaAutorRedeSocial),
-        _botao(context, 'Receita favorita dos Autores',
-            Rotas.listaAutorReceitaFavorita),
-        _botao(context, 'Avaliações das receitas',
-            Rotas.listaComentario),
+        _botao(context, 'Receita favorita dos Autores', Rotas.listaAutorReceitaFavorita),
+        _botao(context, 'Avaliações das receitas', Rotas.listaComentario),
       ],
     );
   }
@@ -77,40 +76,57 @@ class _AbaCadastros extends StatelessWidget {
         _botao(context, 'Cadastrar Ingrediente', Rotas.cadastroIngrediente),
         _botao(context, 'Cadastrar Utensílio', Rotas.cadastroUtensilio),
         _botao(context, 'Cadastrar Receita', Rotas.cadastroReceita),
-        _botao(context, 'Cadastrar Ingredientes por Receita',
-            Rotas.cadastroReceitaIngrediente),
-        _botao(context, 'Cadastrar Rede Social do Autor',
-            Rotas.cadastroAutorRedeSocial),
-        _botao(context, 'Cadastrar Receita Favorita do Autor',
-            Rotas.cadastroAutorReceitaFavorita),
-        _botao(context, 'Cadastrar Avalicao de receita',
-            Rotas.cadastroComentario),
+        _botao(context, 'Cadastrar Ingredientes por Receita', Rotas.cadastroReceitaIngrediente),
+        _botao(context, 'Cadastrar Rede Social do Autor', Rotas.cadastroAutorRedeSocial),
+        _botao(context, 'Cadastrar Receita Favorita do Autor', Rotas.cadastroAutorReceitaFavorita),
+        _botao(context, 'Cadastrar Avaliação de receita', Rotas.cadastroComentario),
       ],
     );
   }
 }
 
-class _AbaReceitasPorCategoria extends StatelessWidget {
+class _AbaReceitasPorCategoria extends StatefulWidget {
   const _AbaReceitasPorCategoria();
 
   @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        const Text('Receitas por Categoria',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        _botaoCategoria(context, 'Sobremesa'),
-        _botaoCategoria(context, 'Prato Principal'),
-        _botaoCategoria(context, 'Entrada'),
-        _botaoCategoria(context, 'Lanche'),
-        _botaoCategoria(context, 'Bebida'),
-      ],
-    );
+  State<_AbaReceitasPorCategoria> createState() => _AbaReceitasPorCategoriaState();
+}
+
+class _AbaReceitasPorCategoriaState extends State<_AbaReceitasPorCategoria> {
+  final DAOCategoria _daoCategoria = DAOCategoria();
+  List<DTOCategoria> _categorias = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarCategorias();
   }
 
-  Widget _botaoCategoria(BuildContext context, String categoria) {
+  Future<void> _carregarCategorias() async {
+    final categorias = await _daoCategoria.buscarTodos();
+    setState(() {
+      _categorias = categorias;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _categorias.isEmpty
+        ? const Center(child: CircularProgressIndicator())
+        : ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              const Text(
+                'Receitas por Categoria',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ..._categorias.map((categoria) => _botaoCategoria(context, categoria)).toList(),
+            ],
+          );
+  }
+
+  Widget _botaoCategoria(BuildContext context, DTOCategoria categoria) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: ElevatedButton(
@@ -118,10 +134,13 @@ class _AbaReceitasPorCategoria extends StatelessWidget {
           Navigator.pushNamed(
             context,
             Rotas.receitasPorCategoria,
-            arguments: categoria,
+            arguments: {
+              'categoriaId': categoria.id,
+              'nomeCategoria': categoria.nome,
+            },
           );
         },
-        child: Text(categoria),
+        child: Text(categoria.nome),
       ),
     );
   }

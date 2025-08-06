@@ -26,6 +26,7 @@ import 'package:receita/widget/listas/lista_receita_ingrediente.dart';
 import 'package:receita/widget/listas/lista_autor_rede_social.dart';
 import 'package:receita/widget/listas/lista_autor_receita_favorita.dart';
 import 'package:receita/widget/listas/lista_comentario.dart';
+import 'package:receita/widget/listas/lista_receitas_por_categoria.dart';
 
 
 class ReceitaApp extends StatelessWidget {
@@ -64,6 +65,16 @@ class ReceitaApp extends StatelessWidget {
         Rotas.listaAutorReceitaFavorita: (context) => const ListaAutorReceitaFavorita(),
         Rotas.listaComentario: (context) => const ListaComentario(),
 
+        Rotas.receitasPorCategoria: (context) {
+          final argumentos = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final int categoriaId = argumentos['categoriaId'];
+          final String nomeCategoria = argumentos['nomeCategoria'];
+
+          return ListaReceitasPorCategoria(
+            categoriaId: categoriaId,
+            nomeCategoria: nomeCategoria,
+          );
+        },
 
         Rotas.menuPrincipal: (context) => const MenuPrincipal(),
       },
