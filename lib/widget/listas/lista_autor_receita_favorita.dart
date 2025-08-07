@@ -1,94 +1,109 @@
 import 'package:flutter/material.dart';
+import 'package:receita/configuracao/rotas.dart';
+import 'package:receita/dto/dto_autor_receita_favorita.dart';
+import 'package:receita/banco/sqlite/dao/autor_receita_favorita_dao.dart';
 import 'package:receita/banco/sqlite/dao/autor_dao.dart';
 import 'package:receita/banco/sqlite/dao/receita_dao.dart';
-import 'package:receita/banco/sqlite/dao/autor_receita_favorita_dao.dart';
-import 'package:receita/dto/dto_autor.dart';
-import 'package:receita/dto/dto_receita.dart';
-import 'package:receita/dto/dto_autor_receita_favorita.dart';
-import 'package:receita/widget/form_autor_receita_favorita.dart';
+import 'package:receita/widget/componentes/campos/comum/botao_icone.dart';
+import 'package:receita/widget/componentes/campos/comum/titulo_lista.dart';
 
 class ListaAutorReceitaFavorita extends StatefulWidget {
   const ListaAutorReceitaFavorita({super.key});
 
   @override
-  State<ListaAutorReceitaFavorita> createState() => _ListaAutorReceitaFavoritaState();
+  State<ListaAutorReceitaFavorita> createState() =>
+      _ListaAutorReceitaFavoritaState();
 }
 
-class _ListaAutorReceitaFavoritaState extends State<ListaAutorReceitaFavorita> {
-  List<DTOAutorReceitaFavorita> _favoritos = [];
-  Map<int, DTOAutor> _mapaAutores = {};
-  Map<int, DTOReceita> _mapaReceitas = {};
+class _ListaAutorReceitaFavoritaState
+    extends State<ListaAutorReceitaFavorita> {
+  final _dao = DAOAutorReceitaFavorita();
+  final _daoAutor = DAOAutor();
+  final _daoReceita = DAOReceita();
+
+  List<DTOAutorReceitaFavorita> _lista = [];
+  Map<int, String> _nomesAutores = {};
+  Map<int, String> _nomesReceitas = {};
+  bool _carregando = true;
 
   @override
   void initState() {
     super.initState();
-    _carregarFavoritos();
+    _carregar();
   }
 
-  Future<void> _carregarFavoritos() async {
-    final favoritos = await DAOAutorReceitaFavorita().buscarTodos();
-    final autores = await DAOAutor().buscarTodos();
-    final receitas = await DAOReceita().buscarTodos();
+  Future<void> _carregar() async {
+    setState(() => _carregando = true);
 
-    setState(() {
-      _favoritos = favoritos;
-      _mapaAutores = {for (var a in autores) a.id!: a};
-      _mapaReceitas = {for (var r in receitas) r.id!: r};
-    });
+    _lista = await _dao.buscarTodos();
+    final autores = await _daoAutor.buscarTodos();
+    final receitas = await _daoReceita.buscarTodos();
+
+    _nomesAutores = {for (var a in autores) a.id!: a.nome};
+    _nomesReceitas = {for (var r in receitas) r.id!: r.nome};
+
+    setState(() => _carregando = false);
   }
 
-  Future<void> _excluir(int id) async {
-    await DAOAutorReceitaFavorita().excluirPorId(id);
-    await _carregarFavoritos();
-  }
-
-  void _abrirFormulario({DTOAutorReceitaFavorita? favorito}) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => FormAutorReceitaFavorita(favorito: favorito),
-      ),
-    );
-    await _carregarFavoritos();
+  Future<void> _excluir(DTOAutorReceitaFavorita dto) async {
+    if (dto.id == null) {
+      throw Exception('ID da associação é nulo e não pode ser excluído.');
+    }
+    await _dao.excluirPorId(dto.id!);
+    _carregar();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Receitas Favoritas dos Autores'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _abrirFormulario(),
-          )
-        ],
-      ),
-      body: ListView.builder(
-        itemCount: _favoritos.length,
-        itemBuilder: (_, index) {
-          final fav = _favoritos[index];
-          final autor = _mapaAutores[fav.autorId];
-          final receita = _mapaReceitas[fav.receitaId];
+      appBar:
+          AppBar(title: const TituloLista(titulo: 'Receitas Favoritas por Autor')),
+      body: _carregando
+          ? const Center(child: CircularProgressIndicator())
+          : _lista.isEmpty
+              ? const Center(child: Text('Nenhuma receita favorita cadastrada'))
+              : ListView.builder(
+                  itemCount: _lista.length,
+                  itemBuilder: (context, index) {
+                    final dto = _lista[index];
+                    final nomeAutor =
+                        _nomesAutores[dto.autorId] ?? 'Autor desconhecido';
+                    final nomeReceita =
+                        _nomesReceitas[dto.receitaId] ?? 'Receita desconhecida';
 
-          return ListTile(
-            title: Text('${autor?.nome ?? "Autor desconhecido"}'),
-            subtitle: Text('❤️ ${receita?.nome ?? "Receita desconhecida"}'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => _abrirFormulario(favorito: fav),
+                    return Card(
+                      child: ListTile(
+                        title: Text(nomeReceita),
+                        subtitle: Text('Autor: $nomeAutor'),
+                        trailing: Wrap(
+                          spacing: 8,
+                          children: [
+                            BotaoIcone(
+                              icone: Icons.edit,
+                              tooltip: 'Editar',
+                              aoPressionar: () => Navigator.pushNamed(
+                                context,
+                                Rotas.cadastroAutorReceitaFavorita,
+                                arguments: dto,
+                              ).then((_) => _carregar()),
+                            ),
+                            BotaoIcone(
+                              icone: Icons.delete,
+                              tooltip: 'Excluir',
+                              aoPressionar: () => _excluir(dto),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => _excluir(fav.id!),
-                ),
-              ],
-            ),
-          );
-        },
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.pushNamed(
+          context,
+          Rotas.cadastroAutorReceitaFavorita,
+        ).then((_) => _carregar()),
+        child: const Icon(Icons.add),
       ),
     );
   }

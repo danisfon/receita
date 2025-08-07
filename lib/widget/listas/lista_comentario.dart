@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:receita/banco/sqlite/dao/comentario_dao.dart';
-import 'package:receita/banco/sqlite/dao/autor_dao.dart';
-import 'package:receita/banco/sqlite/dao/receita_dao.dart';
 import 'package:receita/configuracao/rotas.dart';
 import 'package:receita/dto/dto_comentario.dart';
-import 'package:receita/dto/dto_autor.dart';
-import 'package:receita/dto/dto_receita.dart';
+import 'package:receita/banco/sqlite/dao/comentario_dao.dart';
+import 'package:receita/banco/sqlite/dao/receita_dao.dart';
+import 'package:receita/widget/componentes/campos/comum/botao_icone.dart';
+import 'package:receita/widget/componentes/campos/comum/titulo_lista.dart';
 
 class ListaComentario extends StatefulWidget {
   const ListaComentario({super.key});
@@ -15,13 +14,11 @@ class ListaComentario extends StatefulWidget {
 }
 
 class _ListaComentarioState extends State<ListaComentario> {
-  final DAOComentario _daoComentario = DAOComentario();
-  final DAOReceita _daoReceita = DAOReceita();
-  final DAOAutor _daoAutor = DAOAutor();
+  final _dao = DAOComentario();
+  final _daoReceita = DAOReceita();
 
-  List<DTOComentario> _comentarios = [];
+  List<DTOComentario> _lista = [];
   Map<int, String> _nomesReceitas = {};
-  Map<int, String> _nomesAutores = {};
   bool _carregando = true;
 
   @override
@@ -30,82 +27,70 @@ class _ListaComentarioState extends State<ListaComentario> {
     _carregar();
   }
 
+  Future<void> _carregar() async {
+    setState(() => _carregando = true);
+    _lista = await _dao.buscarTodos();
+
+    final receitas = await _daoReceita.buscarTodos();
+    _nomesReceitas = {for (var r in receitas) r.id!: r.nome};
+
+    setState(() => _carregando = false);
+  }
+
+  Future<void> _excluir(DTOComentario dto) async {
+    if (dto.id == null) {
+      throw Exception('ID do comentário é nulo e não pode ser excluído.');
+    }
+    await _dao.excluir(dto.id!);
+    _carregar();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Comentários'),
-        actions: [
-          IconButton(
-            onPressed: _carregar,
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const TituloLista(titulo: 'Comentários')),
       body: _carregando
           ? const Center(child: CircularProgressIndicator())
-          : _comentarios.isEmpty
-              ? const Center(child: Text('Nenhum comentário cadastrado'))
+          : _lista.isEmpty
+              ? const Center(child: Text('Nenhum comentário encontrado'))
               : ListView.builder(
-                  itemCount: _comentarios.length,
-                  itemBuilder: (context, index) =>
-                      _itemLista(_comentarios[index]),
+                  itemCount: _lista.length,
+                  itemBuilder: (context, index) {
+                    final dto = _lista[index];
+                    final nomeReceita =
+                        _nomesReceitas[dto.receitaId] ?? 'Receita desconhecida';
+                    return Card(
+                      child: ListTile(
+                        title: Text(dto.texto),
+                        subtitle: Text('Nota: ${dto.nota} • Receita: $nomeReceita'),
+                        trailing: Wrap(
+                          spacing: 8,
+                          children: [
+                            BotaoIcone(
+                              icone: Icons.edit,
+                              tooltip: 'Editar',
+                              aoPressionar: () => Navigator.pushNamed(
+                                context,
+                                Rotas.cadastroComentario,
+                                arguments: dto,
+                              ).then((_) => _carregar()),
+                            ),
+                            BotaoIcone(
+                              icone: Icons.delete,
+                              tooltip: 'Excluir',
+                              aoPressionar: () => _excluir(dto),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(
-          context,
-          Rotas.cadastroComentario,
-        ).then((_) => _carregar()),
+        onPressed: () => Navigator.pushNamed(context, Rotas.cadastroComentario)
+            .then((_) => _carregar()),
         child: const Icon(Icons.add),
       ),
     );
-  }
-
-  Widget _itemLista(DTOComentario comentario) {
-    final nomeReceita =
-        _nomesReceitas[comentario.receitaId] ?? 'Receita desconhecida';
-    final nomeAutor = _nomesAutores[comentario.autorId] ?? 'Autor desconhecido';
-
-    return Card(
-      child: ListTile(
-        title: Text(
-          comentario.texto,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text('Receita: $nomeReceita • Autor: $nomeAutor'),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete, color: Colors.red),
-          tooltip: 'Excluir',
-          onPressed: () => _excluir(comentario),
-        ),
-        onTap: () => Navigator.pushNamed(
-          context,
-          Rotas.cadastroComentario,
-          arguments: comentario,
-        ).then((_) => _carregar()),
-      ),
-    );
-  }
-
-  Future<void> _carregar() async {
-    setState(() => _carregando = true);
-
-    final comentarios = await _daoComentario.buscarTodos();
-    final receitas = await _daoReceita.buscarTodos();
-    final autores = await _daoAutor.buscarTodos();
-
-    // Mapeia os nomes das receitas e autores por ID
-    _nomesReceitas = {for (var r in receitas) r.id!: r.nome};
-    _nomesAutores = {for (var a in autores) a.id!: a.nome};
-
-    setState(() {
-      _comentarios = comentarios;
-      _carregando = false;
-    });
-  }
-
-  Future<void> _excluir(DTOComentario comentario) async {
-    await _daoComentario.excluir(comentario.id!);
-    _carregar();
   }
 }
