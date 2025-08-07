@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:receita/banco/sqlite/dao/utensilio_dao.dart';
 import 'package:receita/configuracao/rotas.dart';
 import 'package:receita/dto/dto_utensilio.dart';
+import 'package:receita/banco/sqlite/dao/utensilio_dao.dart';
+import 'package:receita/widget/componentes/campos/comum/botao_icone.dart';
+import 'package:receita/widget/componentes/campos/comum/titulo_lista.dart';
 
 class ListaUtensilio extends StatefulWidget {
   const ListaUtensilio({super.key});
@@ -12,60 +14,71 @@ class ListaUtensilio extends StatefulWidget {
 
 class _ListaUtensilioState extends State<ListaUtensilio> {
   final _dao = DAOUtensilio();
-  List<DTOUtensilio> _utensilios = [];
+  List<DTOUtensilio> _lista = [];
+  bool _carregando = true;
 
   @override
   void initState() {
     super.initState();
-    _carregarDados();
+    _carregar();
   }
 
-  Future<void> _carregarDados() async {
-    final lista = await _dao.buscarTodos();
-    setState(() {
-      _utensilios = lista;
-    });
+  Future<void> _carregar() async {
+    setState(() => _carregando = true);
+    _lista = await _dao.buscarTodos();
+    setState(() => _carregando = false);
   }
 
-  void _editar(DTOUtensilio item) {
-    Navigator.pushNamed(context, Rotas.cadastroUtensilio, arguments: item)
-        .then((_) => _carregarDados());
-  }
-
-  void _excluir(DTOUtensilio item) async {
-    await _dao.excluir(item.id!);
-    _carregarDados();
+  Future<void> _excluir(DTOUtensilio dto) async {
+    if (dto.id == null) {
+      throw Exception('ID do utensílio é nulo e não pode ser excluído.');
+    }
+    await _dao.excluir(dto.id!);
+    _carregar();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Utensílios')),
-      body: ListView.builder(
-        itemCount: _utensilios.length,
-        itemBuilder: (_, i) {
-          final item = _utensilios[i];
-          return ListTile(
-            title: Text(item.nome),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => _editar(item),
+      appBar: AppBar(title: const TituloLista(titulo: 'Utensílios')),
+      body: _carregando
+          ? const Center(child: CircularProgressIndicator())
+          : _lista.isEmpty
+              ? const Center(child: Text('Nenhum utensílio encontrado'))
+              : ListView.builder(
+                  itemCount: _lista.length,
+                  itemBuilder: (context, index) {
+                    final dto = _lista[index];
+                    return Card(
+                      child: ListTile(
+                        title: Text(dto.nome),
+                        subtitle: Text(dto.material ?? ''),
+                        trailing: Wrap(
+                          spacing: 8,
+                          children: [
+                            BotaoIcone(
+                              icone: Icons.edit,
+                              tooltip: 'Editar',
+                              aoPressionar: () => Navigator.pushNamed(
+                                context,
+                                Rotas.cadastroUtensilio,
+                                arguments: dto,
+                              ).then((_) => _carregar()),
+                            ),
+                            BotaoIcone(
+                              icone: Icons.delete,
+                              tooltip: 'Excluir',
+                              aoPressionar: () => _excluir(dto),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => _excluir(item),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, Rotas.cadastroUtensilio)
-            .then((_) => _carregarDados()),
+            .then((_) => _carregar()),
         child: const Icon(Icons.add),
       ),
     );

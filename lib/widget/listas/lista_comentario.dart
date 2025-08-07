@@ -62,7 +62,8 @@ class _ListaComentarioState extends State<ListaComentario> {
   }
 
   Widget _itemLista(DTOComentario comentario) {
-    final nomeReceita = _nomesReceitas[comentario.receitaId] ?? 'Receita desconhecida';
+    final nomeReceita =
+        _nomesReceitas[comentario.receitaId] ?? 'Receita desconhecida';
     final nomeAutor = _nomesAutores[comentario.autorId] ?? 'Autor desconhecido';
 
     return Card(
